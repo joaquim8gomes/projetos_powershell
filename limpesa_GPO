@@ -1,0 +1,69 @@
+Write-Host "Script para GPO/restart da maquina - Joaquim." -ForegroundColor Yellow
+
+$nao = $false
+$sim = $true
+$continuar = $sim
+
+function function_GPO{ #FunÃ§Ã£o atualizar GPO
+    param([string]$maquina)
+
+    Invoke-Command -ComputerName $maquina -ScriptBlock {
+        param($maquina)
+        Write-Host "Atualizando as politicas da maquina..." -ForegroundColor Green
+        gpupdate /force
+        Write-Host "Politicas atualizadas" -ForegroundColor Green
+    } -ArgumentList $maquina
+}
+
+function function_reiniciar{
+    param([string]$maquina)
+
+    Invoke-Command -ComputerName $maquina -ScriptBlock{
+        param($maquina)
+
+        Write-Host "Reiniciando a maquina..." -ForegroundColor Green
+        shutdown -r -t 0
+        Read-Host "Digite uma tecla para encerrar"
+        break
+    }-ArgumentList $maquina
+}
+
+#----------------------------------------------------------------------------------------------------------
+#ComeÃ§ando script
+while ($continuar -eq $sim) { #Conectar na maquina
+    $maquina = Read-Host "Digite o hostname da maquina"
+
+    try {
+        Write-Host "Conectando na maquina..." -ForegroundColor Green
+        Test-Connection -ComputerName $maquina -Count 1 -Quiet -ErrorAction Stop
+        $continuar = $nao
+    }
+    catch {
+        Write-Host "Maquina nao esta pingando." -ForegroundColor Red
+        Write-Host "Tente novamente." -ForegroundColor Red
+    }#Fim Try
+} #Fim While
+
+function_GPO -maquina $maquina
+
+
+$continuar = $sim
+while ($continuar -eq $sim) {
+    $ajuda = Read-Host "Deseja reiniciar a maquina? 'S' ou 'N'"
+    
+    if ($ajuda -eq "s" -or $ajuda -eq "S") {
+        function_reiniciar -maquina $maquina
+    }elseif($ajuda -eq "n" -or $ajuda -eq "N"){
+        Write-Host "Script encerrado" -ForegroundColor Yellow
+        Read-Host "Digite uma tecla para encerrar"
+        break
+    }else{
+        Write-Host "Digite 'S' ou 'N':"
+        Read-Host "Digite uma tecla para voltar"
+        $continuar = $sim
+    }#Fim IFelse
+} #Fim While
+
+
+
+
