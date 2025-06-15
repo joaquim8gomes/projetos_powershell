@@ -1,0 +1,59 @@
+$sim = $true
+$continuar = $sim
+
+Write-Host "Script Joaquim Gomes" -ForegroundColor Yellow
+
+#FunÃ§Ã£o parar processo
+function parar_processo{
+    param([string]$maquina)
+
+    Invoke-Command -ComputerName $maquina -ScriptBlock{
+        param([string]$maquina)
+        $nome = Read-Host "Digite o ID de acordo com a tabela acima"
+        Stop-Process -Id $nome -Force
+        Write-Host "Parando processo..." -ForegroundColor Green
+    }-ArgumentList $maquina
+}
+#FunÃ§Ã£o procurar processo
+function f_procurar{
+    param([string]$maquina)
+
+    Invoke-Command -ComputerName $maquina -ScriptBlock{
+        param($maquina)
+        $nome = Read-Host "Digite o nome do processo:"
+
+        Get-Process | Where-Object { $_.Name -like "*$nome*" }
+
+        Write-Host " "
+    }-ArgumentList $maquina
+}
+
+$maquina = Read-Host "Digite o hostname da maquina"
+
+$conexao = Test-Connection -ComputerName $maquina -Count 1 -ErrorAction SilentlyContinue
+
+$continuar = $sim
+while($continuar -eq $sim){    
+    if($conexao){
+        Write-Host "Conectando na maquina..." -ForegroundColor Green
+    
+        f_procurar $maquina
+    
+        parar_processo $maquina
+    
+        $ajuda = Read-Host "Finalizar outro processo? 'S' ou 'N'"
+    
+        if($ajuda -eq 'S' -or $ajuda -eq 's'){
+            $continuar = $sim
+        }else{
+            Write-Host "Processo finalizado!" -ForegroundColor Red
+            break
+        }
+    
+    }#Fim conexao
+    else{
+        Write-Host "Maquina nao esta pingando!" -ForegroundColor Red
+        Write-Host "Tente novamente!" -ForegroundColor Red
+    }#Fim conexao
+
+}#Fim While
