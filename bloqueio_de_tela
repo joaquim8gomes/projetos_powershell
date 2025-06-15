@@ -1,0 +1,25 @@
+$sim = $true
+$continuar = $sim
+
+while ($continuar -eq $sim) {
+    $maquina = Read-Host "Type the hostname of the machine"
+    
+    Invoke-Command -ComputerName $maquina -ScriptBlock{
+        param($maquina)
+        PsExec.exe \\$maquina -i 1 -s rundll32.exe user32.dll,LockWorkStation
+    
+        Write-Host "Screen successfully blocked. Would you like to do it again?"
+    }-ArgumentList $maquina
+    
+    $escolha = Read-Host "Type 'S' or 'N'"
+    
+    if($escolha -eq 'S' -or $escolha -eq 's'){
+        $continuar = $sim
+    }elseif($escolha -eq 'N' -or $escolha -eq 'n'){
+        Write-Host "Process completed!" -ForegroundColor Red
+        break
+    }else{
+        Write-Host "Type 'S' or 'N'" -ForegroundColor Red
+        $continuar = $sim
+    }    
+}#Fim While
