@@ -1,0 +1,26 @@
+$maquina = Read-Host "Digite o host-name da maquina"
+$sim = $true
+$continuar = $sim
+
+$conexao = Test-Connection -ComputerName $maquina -Count 1 -ErrorAction Stop
+
+Write-Host "Conectando na maquina..." -ForegroundColor Green
+
+while ($continuar -eq $sim) {
+
+    if($conexao){
+        Invoke-Command -ComputerName $maquina -ScriptBlock {
+            $mensagem = Read-Host "Digite uma mensagem para tela da maquina"
+            msg * "$mensagem"
+        }#Fim Invoke Command
+    
+        $ajuda = Read-Host "Quer enviar outra? 'S' ou 'N'"
+        if ($ajuda -eq "s" -or $ajuda -eq "S"){
+            $continuar = $sim
+        }else{#Fim IF
+            Write-Host "Finalizando script. Obrigado!" -ForegroundColor Red
+            break
+        }
+    
+    }#Fim IF
+}#Fim While
