@@ -1,0 +1,69 @@
+$sim = $true
+$continue = $sim
+write-host "Script Joaquim Gomes - SD - CLK" -ForegroundColor Yellow
+#==================================FunÃ§Ãµes=========================
+#FunÃ§Ã£o PING
+function function_ping {
+    param ([string]$maquina)
+    Write-Host " "
+    ping $maquina
+}#Fim funÃ§Ã£o PING
+
+function function_quser {
+    param ([string]$maquina)
+    Invoke-Command -ComputerName $maquina -ScriptBlock{
+        Write-Host " "
+        quser
+    }-ArgumentList $maquina
+}#Fim funÃ§Ã£o QUSER
+
+function function_tracertping{
+    param([string]$maquina)
+    Write-Host " "
+    $url = Read-Host "Digite a URL do tracert"
+    Clear-Host
+
+    Write-Host " "
+    Write-Host "Ping:" -ForegroundColor Green
+    ping $url
+
+    Write-Host " "
+    Write-Host "Tracert:" -ForegroundColor Green
+    tracert $url
+}
+
+while ($continue -eq $sim) {
+    Write-Host " "
+    Write-Host " "
+    #Teste de conexÃ£o
+    $maquina = Read-Host "Digite o hostname da maquina"
+    $conexao = Test-Connection -ComputerName $maquina -Count 1 -Quiet -ErrorAction Stop    
+#================================Codigo===========================
+    if($conexao){
+        Write-Host " "
+        Write-Host "Conectando na maquina..." -ForegroundColor Green
+        
+        Write-Host " "
+        Write-Host "1 - PING" -ForegroundColor Yellow
+        Write-Host "2 - QUSER" -ForegroundColor Yellow
+        Write-Host "3 - Tracert/Ping" -ForegroundColor Yellow
+        $opcao = read-host "Digite  a opcao"
+        
+        #PING
+        if ($opcao -eq '1') {
+            function_ping $maquina
+        }
+        #QUSER
+        elseif ($opcao -eq '2') {
+            function_quser $maquina
+        }#Tracert/Ping
+        elseif($opcao -eq '3'){
+            function_tracertping $maquina
+        }
+    }else{
+        Write-Host "Maquina nao esta pingando!" -ForegroundColor Red
+    }#Fim conexao    
+}#Fim while
+
+
+
