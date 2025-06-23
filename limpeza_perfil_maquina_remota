@@ -1,6 +1,6 @@
 Write-Host "Script de limpeza de perfil. By: JoaquimGomes" -ForegroundColor Yellow
 
-function function_quser { #FunÃ§Ã£o Deslogar Usuario
+function function_quser { #Função Deslogar Usuario
     param ([string]$maquina)
 
     Invoke-Command -ComputerName $maquina -ScriptBlock{quser}
@@ -24,7 +24,7 @@ function function_quser { #FunÃ§Ã£o Deslogar Usuario
     }else{
         Write-Host "Digite 'S/n' ou 'N/n':" -ForegroundColor Red
     }
-}#Fim FunÃ§Ã£o Deslogar
+}#Fim Função Deslogar
 
 function function_limparperfil{#Limpeza de perfis
     param([string]$maquina)
@@ -55,7 +55,7 @@ function function_limparperfil{#Limpeza de perfis
 
     }#Fim While
 
-}#Fim FunÃ§Ã£o Apagar perfil
+}#Fim Função Apagar perfil
 
 function function_limpartodos { # Limpar todos os perfis
     param([string]$maquina)
@@ -69,7 +69,7 @@ function function_limpartodos { # Limpar todos os perfis
             $_.Loaded -eq $false
         }
 
-        # ObtÃ©m o perfil da pessoa logada
+        # Obtém o perfil da pessoa logada
         $perfilLogado = [System.Security.Principal.WindowsIdentity]::GetCurrent().Name
 
         foreach ($perfil in $perfis) {
@@ -79,23 +79,23 @@ function function_limpartodos { # Limpar todos os perfis
 
             Write-Host "Analisando o perfil: $nomeDoUsuario" -ForegroundColor Cyan
 
-            # Verifica se o perfil analisado Ã© o do usuÃ¡rio logado
+            # Verifica se o perfil analisado é o do usuário logado
             if ($nomeDoUsuario -eq $perfilLogado.Split('\')[1]) {
-                Write-Host "O perfil '$nomeDoUsuario' Ã© o do usuÃ¡rio logado e nÃ£o serÃ¡ excluÃ­do!" -ForegroundColor Yellow
+                Write-Host "O perfil '$nomeDoUsuario' é o do usuário logado e não será excluído!" -ForegroundColor Yellow
             }
             elseif ($tipo -eq "Windows") {
-                Write-Host "O perfil '$nomeDoUsuario' nÃ£o serÃ¡ excluÃ­do!" -ForegroundColor Yellow
+                Write-Host "O perfil '$nomeDoUsuario' não será excluído!" -ForegroundColor Yellow
             }
             elseif ($tipo -eq "Users") {
-                Write-Host "O perfil '$nomeDoUsuario' estÃ¡ sendo excluÃ­do! Aguarde..." -ForegroundColor Red
+                Write-Host "O perfil '$nomeDoUsuario' está sendo excluído! Aguarde..." -ForegroundColor Red
                 try {
                     $perfil | Remove-WmiObject
-                    Write-Host "Perfil '$nomeDoUsuario' excluÃ­do com sucesso!" -ForegroundColor Green
+                    Write-Host "Perfil '$nomeDoUsuario' excluído com sucesso!" -ForegroundColor Green
                 } catch {
                     Write-Host "Erro ao excluir o perfil '$nomeDoUsuario': $_" -ForegroundColor Red
                 }
             } else {
-                Write-Host "O perfil '$nomeDoUsuario' nÃ£o corresponde aos critÃ©rios." -ForegroundColor Blue
+                Write-Host "O perfil '$nomeDoUsuario' não corresponde aos critérios." -ForegroundColor Blue
             }
 
             Start-Sleep -Seconds 2
@@ -104,7 +104,7 @@ function function_limpartodos { # Limpar todos os perfis
     } -ArgumentList $maquina
 } # fim Limpar todos perfis
 
-function function_gpo{#AtualizaÃ§Ã£o das GPO
+function function_gpo{#Atualização das GPO
     param ([string] $maquina)
     
     $ajuda = Read-Host "Deseja atualizar as GPO da maquina? 'S' ou 'N'"
@@ -129,7 +129,7 @@ function function_gpo{#AtualizaÃ§Ã£o das GPO
         }#Fim IFElse
     }#Fim While
 
-}#Fim funÃ§Ã£o GPO
+}#Fim função GPO
 
 function function_reiniciar {
     param ([string]$maquina)
@@ -157,18 +157,18 @@ function function_reiniciar {
     
 
     
-}#Fim funÃ§Ã£o reiniciar
+}#Fim função reiniciar
 
 #--------------------------------------------------------------
 
-while ($true) { #ComeÃ§o do codigo
+while ($true) { #Começo do codigo
     
-    try { #Teste conexÃ£o
+    try { #Teste conexão
         $maquina = Read-Host "Digite o host-name da maquina"
         Test-Connection -ComputerName $maquina -Count 1 -Quiet -ErrorAction Stop
         Write-Host "Conectando na maquina..." -ForegroundColor Green
         
-        #FunÃ§Ã£o deslogar
+        #Função deslogar
         function_quser -maquina $maquina
 
         Write-Host "Deseja excluir um perfil (1) ou todos (2)?" -ForegroundColor Yellow
@@ -177,7 +177,7 @@ while ($true) { #ComeÃ§o do codigo
         $ajuda = Read-Host ":"
 
         if($ajuda -eq 1){
-             #FunÃ§Ã£o limpar perfil
+             #Função limpar perfil
             function_limparperfil -maquina $maquina
 
         }elseif($ajuda -eq 2){
@@ -185,10 +185,10 @@ while ($true) { #ComeÃ§o do codigo
             Read-Host "Processo finalizado, digite uma tecla para continuar..."
         }#Fim IFelse
 
-        #FunÃ§Ã£o atualizar GPO
+        #Função atualizar GPO
         function_gpo -maquina $maquina
 
-        #FunÃ§Ã£o reiniciar
+        #Função reiniciar
         function_reiniciar -maquina $maquina
         break
 
@@ -196,6 +196,6 @@ while ($true) { #ComeÃ§o do codigo
     catch {
         Write-Host "Maquina nao esta pingando" -ForegroundColor Red
         Write-Host "Tente novamente" -ForegroundColor Red
-    }#Fim TryCarch conexÃ£o
+    }#Fim TryCarch conexão
     
 } #Fim While
