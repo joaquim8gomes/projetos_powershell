@@ -1,59 +1,70 @@
+Write-Host "Script parar processos - Joaquim Gomes" -ForegroundColor Yellow
 $sim = $true
 $continuar = $sim
 
-Write-Host "Script Joaquim Gomes" -ForegroundColor Yellow
-
-#FunÃ§Ã£o parar processo
+#Função parar processo
 function parar_processo{
     param([string]$maquina)
 
-    Invoke-Command -ComputerName $maquina -ScriptBlock{
-        param([string]$maquina)
-        $nome = Read-Host "Digite o ID de acordo com a tabela acima"
-        Stop-Process -Id $nome -Force
-        Write-Host "Parando processo..." -ForegroundColor Green
-    }-ArgumentList $maquina
+    try {
+        Invoke-Command -ComputerName $maquina -ScriptBlock{
+            param([string]$maquina)
+            $nome = Read-Host "Digite o ID de acordo com a tabela acima"
+            Stop-Process -Id $nome -Force
+            Write-Host "Parando processo..." -ForegroundColor Green
+        }-ArgumentList $maquina
+    }
+    catch {
+        write-host "Maquina nao esta com WinRM habilitado!" -ForegroundColor Red
+        write-host "Nao foi possivel conectar de forma remota!" -ForegroundColor Red
+    }
 }
-#FunÃ§Ã£o procurar processo
+#Função procurar processo
 function f_procurar{
     param([string]$maquina)
 
-    Invoke-Command -ComputerName $maquina -ScriptBlock{
-        param($maquina)
-        $nome = Read-Host "Digite o nome do processo:"
-
-        Get-Process | Where-Object { $_.Name -like "*$nome*" }
-
-        Write-Host " "
-    }-ArgumentList $maquina
+    try {
+        Invoke-Command -ComputerName $maquina -ScriptBlock{
+            param($maquina)
+            $nome = Read-Host "Digite o nome do processo:"
+    
+            Get-Process | Where-Object { $_.Name -like "*$nome*" }
+    
+            Write-Host " "
+        }-ArgumentList $maquina        
+    }    
+    catch {
+        write-host "Maquina nao esta com WinRM habilitado!" -ForegroundColor Red
+        write-host "Nao foi possivel conectar de forma remota!" -ForegroundColor Red
+    }
 }
 
 $maquina = Read-Host "Digite o hostname da maquina"
+$conexao = Test-Connection -ComputerName $maquina -Count 1 -ErrorAction Stop
 
-$conexao = Test-Connection -ComputerName $maquina -Count 1 -ErrorAction SilentlyContinue
-
-$continuar = $sim
 while($continuar -eq $sim){    
     if($conexao){
         Write-Host "Conectando na maquina..." -ForegroundColor Green
-    
-        f_procurar $maquina
-    
-        parar_processo $maquina
-    
+
+        try {f_procurar $maquina}
+        catch {write-host "Erro ao procurar os processos!" -ForegroundColor Red}
+
+        try {parar_processo $maquina}
+        catch {write-host "Erro ao parar os processos!" -ForegroundColor Red}
+        
         $ajuda = Read-Host "Finalizar outro processo? 'S' ou 'N'"
-    
         if($ajuda -eq 'S' -or $ajuda -eq 's'){
             $continuar = $sim
-        }else{
+        }elseif($ajuda -eq 'sair'){
+            break
+        }
+        else{
             Write-Host "Processo finalizado!" -ForegroundColor Red
             break
         }
-    
     }#Fim conexao
     else{
         Write-Host "Maquina nao esta pingando!" -ForegroundColor Red
         Write-Host "Tente novamente!" -ForegroundColor Red
     }#Fim conexao
-
 }#Fim While
