@@ -1,0 +1,124 @@
+
+$sim = $true
+$continue = $sim
+write-host "Script Joaquim Gomes/SD" -ForegroundColor Yellow
+#==================================Funções=========================
+#Função QUSER
+function function_quser {
+    param ([string]$maquina)
+    Invoke-Command -ComputerName $maquina -ScriptBlock{
+        Write-Host " "
+        quser
+    }-ArgumentList $maquina
+}
+
+#Função Tracert/Ping
+function function_tracertping{
+    param([string]$maquina)
+
+    $maquina = Read-Host "Digite a maquina para conectar"
+    $conexao = Test-Connection -ComputerName $maquina -Count 1 -Quiet -ErrorAction SilentlyContinue
+
+    if($conexao){
+        try {
+            Invoke-Command -ComputerName $maquina -ScriptBlock{
+                param($maquina)
+
+                Write-Host " "
+                $url = Read-Host "Digite a URL do tracert"
+                Clear-Host
+            
+                Write-Host " "
+                Write-Host "Ping:" -ForegroundColor Green
+                ping $url
+            
+                Write-Host " "
+                Write-Host "Tracert:" -ForegroundColor Green
+                tracert $url
+            } -ArgumentList $maquina        
+
+        }
+        catch {
+            Write-Host "Nao foi possivel conectar na maquina!" -ForegroundColor Red
+        }
+    }else{
+        Write-Host "Maquina nao esta pingando!" -ForegroundColor Red
+        Write-Host "Tente novamente!" -ForegroundColor Red
+    }
+}
+#================================Codigo===========================
+
+while ($continue -eq $sim) {
+    Write-Host " "
+    Write-Host " "
+    Write-Host "Escolha uma opcao:" -ForegroundColor DarkYellow
+    Write-Host " "
+    Write-Host "1 - PING" -ForegroundColor Yellow
+    Write-Host "2 - PING -t" -ForegroundColor Yellow
+    Write-Host "3 - QUSER" -ForegroundColor Yellow
+    Write-Host "4 - Tracert/Ping" -ForegroundColor Yellow
+    Write-Host "5 - Reiniciar" -ForegroundColor Yellow
+    Write-Host "6 ou 'sair' - Encerrar o script" -ForegroundColor Yellow 
+    Write-Host ""       
+    $opcao = read-host "Digite  a opcao"
+    
+    if($opcao){
+        #PING
+        if ($opcao -eq '1') {
+            Clear-Host
+            $maquina = Read-Host "Digite o hostname da maquina"
+            Clear-Host
+            Write-Host "PING:" -ForegroundColor Green
+            ping $maquina
+        }
+        #PING -t
+        elseif($opcao -eq '2'){
+            Clear-Host
+            $maquina = Read-Host "Digite o hostname da maquina"
+            Clear-Host
+            Write-Host "PING -t:" -ForegroundColor Green
+            Write-Host "Pressione CTRL+C para parar o ping." -ForegroundColor DarkGray
+            ping $maquina -t
+        }
+        #QUSER
+        elseif ($opcao -eq '3') {
+            Clear-Host
+            $maquina = Read-Host "Digite o hostname da maquina"
+            Clear-Host
+            Write-Host "QUSER:" -ForegroundColor Green
+            function_quser $maquina
+        }
+        #Tracert/Ping
+        elseif($opcao -eq '4'){
+            Clear-Host
+            function_tracertping $maquina
+        }
+        #Reiniciar maquina
+        elseif($opcao -eq '5'){
+            Clear-Host
+            $maquina = Read-Host "Digite o hostname da maquina"
+            Clear-Host
+            Invoke-Command -ComputerName $maquina -ScriptBlock{
+                shutdown -r -t 0
+                Write-Host "Reiniciando a maquina!" -ForegroundColor Green
+            }
+            
+        }
+        #Sair
+        elseif ($opcao -eq 'sair' -or $opcao -eq '6') {
+            Write-Host "Encerrando o script..." -ForegroundColor Red
+            break
+        }
+        #Opcao errada
+        else{
+            Clear-Host
+            Write-Host "Digite um opcao valida: 1, 2, 3 ou sair." -ForegroundColor Red
+        }
+    }else{
+        Write-Host "Maquina nao esta pingando!" -ForegroundColor Red
+        Write-Host "Tente novamente!" -ForegroundColor Red
+    }#Fim conexao    
+}#Fim while
+
+
+
